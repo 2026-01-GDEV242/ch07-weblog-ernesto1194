@@ -93,5 +93,24 @@ public class LogAnalyzer
 
         return busiestHour;
     }
+    
+    /**
+ * Returns the least busy hour (0-23) based on hourly counts.
+ * Must be called after analyzeHourlyData().
+ */
+public int quietestHour()
+{
+    int minCount = hourCounts[0];
+    int quietestHour = 0;
+
+    for (int hour = 1; hour < hourCounts.length; hour++) {
+        if (hourCounts[hour] < minCount) {
+            minCount = hourCounts[hour];
+            quietestHour = hour;
+        }
+    }
+
+    return quietestHour;
+}
 
 }
