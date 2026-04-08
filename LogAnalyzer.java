@@ -74,4 +74,24 @@ public class LogAnalyzer
         }
         return total;
     }
+    
+    /**
+     * Returns the busiest hour (0-23) based on hourly counts.
+     * Must be called after analyzeHourlyData().
+     */
+    public int busiestHour()
+    {
+        int maxCount = hourCounts[0];
+        int busiestHour = 0;
+
+        for (int hour = 1; hour < hourCounts.length; hour++) {
+            if (hourCounts[hour] > maxCount) {
+                maxCount = hourCounts[hour];
+                busiestHour = hour;
+            }
+        }
+
+        return busiestHour;
+    }
+
 }
