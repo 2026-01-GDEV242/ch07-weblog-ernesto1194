@@ -4,129 +4,122 @@
  * @author David J. Barnes and Michael Kölling
  * @version 2016.02.29
  */
-public class LogAnalyzer
-{
-    // Where to calculate the hourly access counts.
-    private int[] hourCounts;
-    // Use a LogfileReader to access the data.
+public class LogAnalyzer {
+    private int[] hourCounts = new int[24];
+    private int[] dayCounts = new int[28];   // Days 1-28
+    private int[] monthCounts = new int[12]; // Months 1-12
     private LogfileReader reader;
 
-    /**
-     * Create an object to analyze hourly web accesses
-     * using the default file.
-     */
-    public LogAnalyzer()
-    { 
-        hourCounts = new int[24];
+    // Default constructor
+    public LogAnalyzer() {
         reader = new LogfileReader();
     }
 
-    /**
-     * Create an object to analyze hourly web accesses
-     * using a specified file.
-     */
-    public LogAnalyzer(String filename)
-    {
-        hourCounts = new int[24];
+    // Constructor with file name
+    public LogAnalyzer(String filename) {
         reader = new LogfileReader(filename);
     }
 
-    /**
-     * Analyze the hourly access data from the log file.
-     */
-    public void analyzeHourlyData()
-    {
+    // Analyze all log entries
+    public void analyzeData() {
+        // reset counts
+        for(int i=0;i<24;i++) hourCounts[i]=0;
+        for(int i=0;i<28;i++) dayCounts[i]=0;
+        for(int i=0;i<12;i++) monthCounts[i]=0;
+
         while(reader.hasNext()) {
             LogEntry entry = reader.next();
-            int hour = entry.getHour();
-            hourCounts[hour]++;
+            hourCounts[entry.getHour()]++;
+            dayCounts[entry.getDay()-1]++;
+            monthCounts[entry.getMonth()-1]++;
         }
     }
 
-    /**
-     * Print the hourly counts.
-     */
-    public void printHourlyCounts()
-    {
-        System.out.println("Hr: Count");
-        for(int hour = 0; hour < hourCounts.length; hour++) {
-            System.out.println(hour + ": " + hourCounts[hour]);
-        }
-    }
-    
-    /**
-     * Print the raw data.
-     */
-    public void printData()
-    {
-        reader.printData();
-    }
-
-    /**
-     * Returns the total number of accesses.
-     */
-    public int numberOfAccesses()
-    {
+    // Total number of accesses
+    public int numberOfAccesses() {
         int total = 0;
-        for (int count : hourCounts) {
-            total += count;
-        }
+        for(int h : hourCounts) total += h;
         return total;
     }
-    
-    /**
-     * Returns the busiest hour (0-23) based on hourly counts.
-     */
-    public int busiestHour()
-    {
-        int maxCount = hourCounts[0];
-        int busiestHour = 0;
 
-        for (int hour = 1; hour < hourCounts.length; hour++) {
-            if (hourCounts[hour] > maxCount) {
-                maxCount = hourCounts[hour];
-                busiestHour = hour;
-            }
+    // Busiest hour
+    public int busiestHour() {
+        int max = hourCounts[0], h = 0;
+        for(int i=1;i<24;i++) if(hourCounts[i]>max){ max=hourCounts[i]; h=i; }
+        return h;
+    }
+
+    // Quietest hour
+    public int quietestHour() {
+        int min = hourCounts[0], h = 0;
+        for(int i=1;i<24;i++) if(hourCounts[i]<min){ min=hourCounts[i]; h=i; }
+        return h;
+    }
+
+    // Busiest two-hour period
+    public int busiestTwoHourPeriod() {
+        int maxSum = hourCounts[0]+hourCounts[1], h=0;
+        for(int i=1;i<23;i++){
+            int sum = hourCounts[i]+hourCounts[i+1];
+            if(sum>maxSum){ maxSum=sum; h=i; }
         }
+        return h;
+    }
 
-        return busiestHour;
+    // Quietest day (1-28)
+    public int quietestDay() {
+        int min = dayCounts[0], d=1;
+        for(int i=1;i<28;i++) if(dayCounts[i]<min){ min=dayCounts[i]; d=i+1; }
+        return d;
+    }
+
+    // Busiest day (1-28)
+    public int busiestDay() {
+        int max = dayCounts[0], d=1;
+        for(int i=1;i<28;i++) if(dayCounts[i]>max){ max=dayCounts[i]; d=i+1; }
+        return d;
+    }
+
+    // Total accesses for a month (1-12)
+    public int totalAccessesForMonth(int month) {
+        if(month<1||month>12) return 0;
+        return monthCounts[month-1];
+    }
+
+    // Quietest month
+    public int quietestMonth() {
+        int min=monthCounts[0], m=1;
+        for(int i=1;i<12;i++) if(monthCounts[i]<min){ min=monthCounts[i]; m=i+1; }
+        return m;
+    }
+
+    // Busiest month
+    public int busiestMonth() {
+        int max=monthCounts[0], m=1;
+        for(int i=1;i<12;i++) if(monthCounts[i]>max){ max=monthCounts[i]; m=i+1; }
+        return m;
+    }
+
+    // Average accesses per month
+    public double averageAccessesPerMonth() {
+        int sum=0;
+        for(int c: monthCounts) sum+=c;
+        return sum/12.0;
     }
     
-    /**
- * Returns the least busy hour (0-23) based on hourly counts.
- */
-public int quietestHour()
-{
-    int minCount = hourCounts[0];
-    int quietestHour = 0;
-
-    for (int hour = 1; hour < hourCounts.length; hour++) {
-        if (hourCounts[hour] < minCount) {
-            minCount = hourCounts[hour];
-            quietestHour = hour;
-        }
+    // Print counts (optional)
+    public void printHourlyCounts() {
+        System.out.println("Hour : Count");
+        for(int i=0;i<24;i++) System.out.println(i+": "+hourCounts[i]);
+    }
+    
+    public void printDailyCounts() {
+        System.out.println("Day : Count");
+        for(int i=0;i<28;i++) System.out.println((i+1)+": "+dayCounts[i]);
     }
 
-    return quietestHour;
-}
-
-/**
- * Returns the first hour of the busiest two-hour period.
- */
-public int busiestTwoHourPeriod()
-{
-    int maxSum = hourCounts[0] + hourCounts[1];
-    int startHour = 0;
-
-    for (int hour = 1; hour < hourCounts.length - 1; hour++) {
-        int sum = hourCounts[hour] + hourCounts[hour + 1];
-        if (sum > maxSum) {
-            maxSum = sum;
-            startHour = hour;
-        }
+    public void printMonthlyCounts() {
+        System.out.println("Month : Count");
+        for(int i=0;i<12;i++) System.out.println((i+1)+": "+monthCounts[i]);
     }
-
-    return startHour;
-}
-
 }
