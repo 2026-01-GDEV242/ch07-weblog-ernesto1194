@@ -64,7 +64,6 @@ public class LogAnalyzer
 
     /**
      * Returns the total number of accesses.
-     * Must be called after analyzeHourlyData().
      */
     public int numberOfAccesses()
     {
@@ -77,7 +76,6 @@ public class LogAnalyzer
     
     /**
      * Returns the busiest hour (0-23) based on hourly counts.
-     * Must be called after analyzeHourlyData().
      */
     public int busiestHour()
     {
@@ -96,7 +94,6 @@ public class LogAnalyzer
     
     /**
  * Returns the least busy hour (0-23) based on hourly counts.
- * Must be called after analyzeHourlyData().
  */
 public int quietestHour()
 {
