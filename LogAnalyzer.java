@@ -110,4 +110,23 @@ public int quietestHour()
     return quietestHour;
 }
 
+/**
+ * Returns the first hour of the busiest two-hour period.
+ */
+public int busiestTwoHourPeriod()
+{
+    int maxSum = hourCounts[0] + hourCounts[1];
+    int startHour = 0;
+
+    for (int hour = 1; hour < hourCounts.length - 1; hour++) {
+        int sum = hourCounts[hour] + hourCounts[hour + 1];
+        if (sum > maxSum) {
+            maxSum = sum;
+            startHour = hour;
+        }
+    }
+
+    return startHour;
+}
+
 }
