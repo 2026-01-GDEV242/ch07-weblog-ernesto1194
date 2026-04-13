@@ -5,128 +5,120 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Scanner;
 
 /**
- * A class to read information from a file of web server accesses.
- * Currently, the log file is assumed to contain simply
- * date and time information in the format:
+ * The LogfileReader class reads log data from a file and provides
+ * access to LogEntry objects one at a time using an iterator.
+ * If the file cannot be found, simulated data is generated instead.
  *
- *    year month day hour minute
- * Log entries are sorted into ascending order of date.
- * 
- * @author David J. Barnes and Michael Kölling.
- * @version    2016.02.29
+ * The log data is expected in the format:
+ * year month day hour minute
+ *
+ * @author Ernesto Cuellar
+ * @version 1.0
  */
 public class LogfileReader implements Iterator<LogEntry>
 {
-    // The data format in the log file.
     private String format;
-    // Where the file's contents are stored in the form
-    // of LogEntry objects.
     private ArrayList<LogEntry> entries;
-    // An iterator over entries.
     private Iterator<LogEntry> dataIterator;
-    
+
     /**
-     * Create a LogfileReader to supply data from a default file.
+     * Creates a LogfileReader using the default log file.
+     * The default file is "demoData.txt".
      */
     public LogfileReader()
     {
         this("demoData.txt");
     }
-    
+
     /**
-     * Create a LogfileReader that will supply data
-     * from a particular log file. 
-     * @param filename The file of log data.
+     * Creates a LogfileReader that reads data from the given file.
+     *
+     * @param filename the name of the log file to read
      */
     public LogfileReader(String filename)
     {
-        // The format for the data.
-        format = "Year Month(1-12) Day Hour Minute";       
-        // Where to store the data.
+        format = "Year Month Day Hour Minute";
         entries = new ArrayList<>();
-        
-        // Attempt to read the complete set of data from file.
-        boolean dataRead;
-        try{
-            // Locate the file with respect to the current environment.
+
+        boolean dataRead = false;
+
+        try {
             URL fileURL = getClass().getClassLoader().getResource(filename);
+
             if(fileURL == null) {
                 throw new FileNotFoundException(filename);
             }
+
             Scanner logfile = new Scanner(new File(fileURL.toURI()));
-            // Read the data lines until the end of file.
+
             while(logfile.hasNextLine()) {
-                String logline = logfile.nextLine();
-                // Break up the line and add it to the list of entries.
-                LogEntry entry = new LogEntry(logline);
+                String line = logfile.nextLine();
+                LogEntry entry = new LogEntry(line);
                 entries.add(entry);
             }
+
             logfile.close();
             dataRead = true;
         }
         catch(FileNotFoundException | URISyntaxException e) {
-            System.out.println("Problem encountered: " + e);
-            dataRead = false;
+            System.out.println("Problem reading file: " + e);
         }
-        // If we couldn't read the log file, use simulated data.
+
         if(!dataRead) {
-            System.out.println("Failed to read the data file: " + filename);
             System.out.println("Using simulated data instead.");
             createSimulatedData(entries);
         }
-        // Sort the entries into ascending order.
+
         Collections.sort(entries);
         reset();
     }
-    
+
     /**
-     * Does the reader have more data to supply?
-     * @return true if there is more data available,
-     *         false otherwise.
+     * Checks if there are more log entries available.
+     *
+     * @return true if more entries exist, false otherwise
      */
+    @Override
     public boolean hasNext()
     {
         return dataIterator.hasNext();
     }
-    
+
     /**
-     * Analyze the next line from the log file and
-     * make it available via a LogEntry object.
-     * 
-     * @return A LogEntry containing the data from the
-     *         next log line.
+     * Returns the next LogEntry from the dataset.
+     *
+     * @return the next LogEntry object
      */
+    @Override
     public LogEntry next()
     {
         return dataIterator.next();
     }
-    
+
     /**
-     * Remove an entry.
-     * This operation is not permitted.
+     * Reset is not supported for removing entries.
      */
+    @Override
     public void remove()
     {
-        System.err.println("It is not permitted to remove entries.");
+        System.err.println("Remove operation not supported.");
     }
-    
+
     /**
-     * @return A string explaining the format of the data
-     *         in the log file.
+     * Gets the expected format of the log file.
+     *
+     * @return a string describing the log format
      */
     public String getFormat()
     {
         return format;
     }
-    
+
     /**
-     * Set up a fresh iterator to provide access to the data.
-     * This allows a single file of data to be processed
-     * more than once.
+     * Resets the iterator so the log data can be read again.
      */
     public void reset()
     {
@@ -134,8 +126,8 @@ public class LogfileReader implements Iterator<LogEntry>
     }
 
     /**
-     * Print the data.
-     */    
+     * Prints all log entries to the console.
+     */
     public void printData()
     {
         for(LogEntry entry : entries) {
@@ -144,16 +136,16 @@ public class LogfileReader implements Iterator<LogEntry>
     }
 
     /**
-     * Provide a sample of simulated data.
-     * NB: To simplify the creation of this data, no
-     * days after the 28th of a month are ever generated.
-     * @param data Where to store the simulated LogEntry objects.
+     * Creates simulated log data if file reading fails.
+     *
+     * @param data the list where generated entries are stored
      */
     private void createSimulatedData(ArrayList<LogEntry> data)
     {
         LogfileCreator creator = new LogfileCreator();
-        // How many simulated entries we want.
+
         int numEntries = 100;
+
         for(int i = 0; i < numEntries; i++) {
             data.add(creator.createEntry());
         }
