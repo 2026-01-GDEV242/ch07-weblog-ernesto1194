@@ -1,1 +1,1 @@
-Weblog Analyzer 
+P6-Weblog Analyzer
