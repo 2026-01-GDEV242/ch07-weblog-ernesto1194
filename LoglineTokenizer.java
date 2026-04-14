@@ -1,43 +1,49 @@
 import java.util.Scanner;
 
 /**
- * Break up line from a web server log file into
- * its separate fields.
- * Currently, the log file is assumed to contain simply
- * integer date and time information.
- * 
- * @author David J. Barnes and Michael Kolling.
- * @version    2016.02.29
+ * The LoglineTokenizer class breaks a single line of web server log data
+ * into separate integer values.
+ *
+ * The expected format of the log line is:
+ * year month day hour minute
+ *
+ * These values are stored in an integer array provided by the caller.
+ *
+ * @author Ernesto Cuellar
+ * @version 1.0
  */
 public class LoglineTokenizer
 {
     /**
-     * Construct a LogLineAnalyzer
+     * Creates a new LoglineTokenizer.
      */
     public LoglineTokenizer()
     {
+        // No initialization required
     }
 
     /**
-     * Tokenize a log line. Place the integer values from
-     * it into an array. The number of tokens on the line
-     * must be sufficient to fill the array.
+     * Tokenizes a log line and stores the values into an integer array.
      *
-     * @param logline The line to be tokenized.
-     * @param dataLine Where to store the values.
+     * The input string must contain enough integer values to fill the array.
+     *
+     * @param logline the line of text containing log data
+     * @param dataLine the array where parsed integer values are stored
+     * @throws java.util.NoSuchElementException if the log line does not contain
+     *         enough integer values
      */
     public void tokenize(String logline, int[] dataLine)
     {
-        try {
-            // Scan the logline for integers.
-            Scanner tokenizer = new Scanner(logline);
-            for(int i = 0; i < dataLine.length; i++) {
-                dataLine[i] = tokenizer.nextInt();
+        Scanner tokenizer = new Scanner(logline);
+
+        for(int i = 0; i < dataLine.length; i++) {
+            if(!tokenizer.hasNextInt()) {
+                throw new java.util.NoSuchElementException(
+                    "Insufficient data items on log line: " + logline
+                );
             }
-        }
-        catch(java.util.NoSuchElementException e) {
-            System.out.println("Insuffient data items on log line: " + logline);
-            throw e;
+
+            dataLine[i] = tokenizer.nextInt();
         }
     }
 }
