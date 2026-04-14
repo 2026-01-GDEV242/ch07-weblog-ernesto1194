@@ -1,2 +1,1 @@
-# Ch06-weblog
-
+P6-Weblog Analyzer
